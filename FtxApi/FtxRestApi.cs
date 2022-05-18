@@ -4,6 +4,7 @@ using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
 using FtxApi.Enums;
+using Newtonsoft.Json;
 
 namespace FtxApi
 {
@@ -184,7 +185,7 @@ namespace FtxApi
             return ParseResponce(result);
         }
 
-        public async Task<dynamic> GetBalancesAsync()
+        public async Task<JBalanceResult> GetBalancesAsync()
         {
             var resultString = $"api/wallet/balances";
 
@@ -192,7 +193,7 @@ namespace FtxApi
 
             var result = await CallAsyncSign(HttpMethod.Get, resultString, sign);
 
-            return ParseResponce(result);
+            return JsonConvert.DeserializeObject<JBalanceResult>(result); ;
         }
 
         public async Task<dynamic> GetDepositAddressAsync(string coin)
