@@ -136,14 +136,16 @@ namespace FtxApi
 
         #region Account
         
-        public async Task<FtxAccountResult> GetAccountInfoAsync()
+        public async Task<T> GetAccountInfoAsync<T>()
         {
             var resultString = $"api/account";
             var sign = GenerateSignature(HttpMethod.Get, "/api/account", "");
 
             var result = await CallAsyncSign(HttpMethod.Get, resultString, sign);
 
-            return JsonConvert.DeserializeObject<FtxAccountResult>(result); ;
+            var ftx = JsonConvert.DeserializeObject<FtxResult<T>>(result);
+            if (!ftx.success) throw new Exception(ftx.error);
+            return ftx.result;
         }
 
 
@@ -185,7 +187,7 @@ namespace FtxApi
             return ParseResponce(result);
         }
 
-        public async Task<FtxBalanceResult> GetBalancesAsync()
+        public async Task<T> GetBalancesAsync<T>()
         {
             var resultString = $"api/wallet/balances";
 
@@ -193,7 +195,9 @@ namespace FtxApi
 
             var result = await CallAsyncSign(HttpMethod.Get, resultString, sign);
 
-            return JsonConvert.DeserializeObject<FtxBalanceResult>(result); ;
+            var ftx = JsonConvert.DeserializeObject<FtxResult<T>>(result);
+            if (!ftx.success) throw new Exception(ftx.error);
+            return ftx.result;
         }
 
         public async Task<dynamic> GetDepositAddressAsync(string coin)
@@ -253,7 +257,7 @@ namespace FtxApi
 
         #region Orders
 
-        public async Task<dynamic> PlaceOrderAsync(string instrument, SideType side, decimal price, OrderType orderType, decimal amount, bool reduceOnly = false)
+        public async Task<T> PlaceOrderAsync<T>(string instrument, SideType side, decimal price, OrderType orderType, decimal amount, bool ioc = false, bool reduceOnly = false)
         {
             var path = $"api/orders";
 
@@ -263,12 +267,15 @@ namespace FtxApi
                 $"\"price\": {price}," +
                 $"\"type\": \"{orderType.ToString()}\"," +
                 $"\"size\": {amount}," +
+                $"\"ioc\": {ioc.ToString().ToLower()}," +
                 $"\"reduceOnly\": {reduceOnly.ToString().ToLower()}}}";
 
             var sign = GenerateSignature(HttpMethod.Post, "/api/orders", body);
             var result = await CallAsyncSign(HttpMethod.Post, path, sign, body);
 
-            return ParseResponce(result);
+            var ftx = JsonConvert.DeserializeObject<FtxResult<T>>(result);
+            if (!ftx.success) throw new Exception(ftx.error);
+            return ftx.result;
         }
 
         public async Task<dynamic> PlaceStopOrderAsync(string instrument, SideType side, decimal triggerPrice, decimal amount, bool reduceOnly = false)

@@ -7,17 +7,20 @@ using System.Threading.Tasks;
 
 namespace FtxApi
 {
-    #region Balance
-    public class FtxBalanceResult
+    #region Result
+    public class FtxResult<T>
     {
         [JsonProperty("success")]
         public bool success { get; set; }
         [JsonProperty("error")]
         public string error { get; set; }
         [JsonProperty("result")]
-        public FtxBalance[] result { get; set; }
+        public T result { get; set; }
     }
 
+    #endregion
+
+    #region Balance
     public class FtxBalance
     {
         [JsonProperty("coin")]
@@ -32,16 +35,6 @@ namespace FtxApi
     #endregion
 
     #region Account
-    public class FtxAccountResult
-    {
-        [JsonProperty("success")]
-        public bool success { get; set; }
-        [JsonProperty("error")]
-        public string error { get; set; }
-        [JsonProperty("result")]
-        public FtxAccount result { get; set; }
-    }
-
     public class FtxAccount
     {
         [JsonProperty("leverage")]
@@ -65,6 +58,26 @@ namespace FtxApi
         [JsonProperty("size")]
         public decimal size { get; set; }
 
+    }
+    #endregion
+
+    #region Order
+    public class FtxOrder
+    {
+        [JsonProperty("id")]
+        public long id { get; set; }
+
+        [JsonProperty("createdAt")]
+        public DateTime createdAt { get; set; }
+
+        [JsonProperty("future")]
+        public string future { get; set; }
+
+        [JsonProperty("side")]
+        public string side { get; set; }
+
+        [JsonProperty("size")]
+        public decimal size { get; set; }
     }
     #endregion
 }
