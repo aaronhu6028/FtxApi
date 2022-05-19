@@ -136,14 +136,14 @@ namespace FtxApi
 
         #region Account
         
-        public async Task<dynamic> GetAccountInfoAsync()
+        public async Task<FtxAccountResult> GetAccountInfoAsync()
         {
             var resultString = $"api/account";
             var sign = GenerateSignature(HttpMethod.Get, "/api/account", "");
 
             var result = await CallAsyncSign(HttpMethod.Get, resultString, sign);
 
-            return ParseResponce(result);
+            return JsonConvert.DeserializeObject<FtxAccountResult>(result); ;
         }
 
 
@@ -185,7 +185,7 @@ namespace FtxApi
             return ParseResponce(result);
         }
 
-        public async Task<JBalanceResult> GetBalancesAsync()
+        public async Task<FtxBalanceResult> GetBalancesAsync()
         {
             var resultString = $"api/wallet/balances";
 
@@ -193,7 +193,7 @@ namespace FtxApi
 
             var result = await CallAsyncSign(HttpMethod.Get, resultString, sign);
 
-            return JsonConvert.DeserializeObject<JBalanceResult>(result); ;
+            return JsonConvert.DeserializeObject<FtxBalanceResult>(result); ;
         }
 
         public async Task<dynamic> GetDepositAddressAsync(string coin)
