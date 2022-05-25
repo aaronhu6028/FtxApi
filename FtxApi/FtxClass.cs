@@ -7,6 +7,15 @@ using System.Threading.Tasks;
 
 namespace FtxApi
 {
+    #region quote
+    public class FtxTicker
+    {
+        public string Instrument;
+        public DateTime Time;
+        public decimal LastPrice;
+    }
+    #endregion
+
     #region Result
     public class FtxResult<T>
     {
@@ -78,6 +87,44 @@ namespace FtxApi
 
         [JsonProperty("size")]
         public decimal size { get; set; }
+    }
+    #endregion
+
+    #region TradeRecord
+    public class FtxTradeRecord
+    {
+        [JsonProperty("future")]
+        public string future { get; set; }
+
+        [JsonProperty("time")]
+        public DateTime time { get; set; }
+
+        [JsonProperty("id")]
+        public long id { get; set; }
+
+        [JsonProperty("orderId")]
+        public long orderId { get; set; }
+
+        [JsonProperty("tradeId")]
+        public long tradeId { get; set; }
+
+        [JsonProperty("side")]
+        public string side { get; set; }
+
+        [JsonProperty("price")]
+        public decimal price { get; set; }
+
+        [JsonProperty("size")]
+        public decimal size { get; set; }
+
+        [JsonProperty("fee")]
+        public decimal fee { get; set; }
+        [JsonProperty("feeRate")]
+        public decimal feeRate { get; set; }
+        [JsonProperty("feeCurrency")]
+        public string feeCurrency { get; set; }
+        [JsonProperty("liquidity")]
+        public string liquidity { get; set; }
     }
     #endregion
 }

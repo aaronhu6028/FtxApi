@@ -149,14 +149,16 @@ namespace FtxApi
         }
 
 
-        public async Task<dynamic> GetPositionsAsync()
+        public async Task<T> GetPositionsAsync<T>()
         {
             var resultString = $"api/positions";
             var sign = GenerateSignature(HttpMethod.Get, "/api/positions", "");
 
             var result = await CallAsyncSign(HttpMethod.Get, resultString, sign);
 
-            return ParseResponce(result);
+            var ftx = JsonConvert.DeserializeObject<FtxResult<T>>(result);
+            if (!ftx.success) throw new Exception(ftx.error);
+            return ftx.result;
         }
 
         public async Task<dynamic> ChangeAccountLeverageAsync(int leverage)
@@ -405,17 +407,18 @@ namespace FtxApi
 
         #region Fills
 
-        public async Task<dynamic> GetFillsAsync(string market, int limit, DateTime start, DateTime end)
+        public async Task<T> GetFillsAsync<T>(string market, DateTime start, DateTime end)
         {
-            var resultString = $"api/fills?market={market}&limit={limit}&start_time={Util.Util.GetSecondsFromEpochStart(start)}&end_time={Util.Util.GetSecondsFromEpochStart(end)}";
+            var resultString = $"api/fills?market={market}&start_time={Util.Util.GetSecondsFromEpochStart(start)}&end_time={Util.Util.GetSecondsFromEpochStart(end)}";
 
             var sign = GenerateSignature(HttpMethod.Get, $"/{resultString}", "");
 
             var result = await CallAsyncSign(HttpMethod.Get, resultString, sign);
 
-            return ParseResponce(result);
+            var ftx = JsonConvert.DeserializeObject<FtxResult<T>>(result);
+            if (!ftx.success) throw new Exception(ftx.error);
+            return ftx.result;
         }
-
         #endregion
 
         #region Funding

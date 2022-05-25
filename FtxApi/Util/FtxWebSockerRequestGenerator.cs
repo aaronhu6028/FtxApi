@@ -48,5 +48,10 @@ namespace FtxApi
         {
             return $"{{\"op\": \"unsubscribe\", \"channel\": \"{channel}\", \"market\": \"{instrument}\"}}";
         }
+
+        public static string GetPingRequest()
+        {
+            return $"{{\"op\": \"ping\"}}";
+        }
     }
 }
