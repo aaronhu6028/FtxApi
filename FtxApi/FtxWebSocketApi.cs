@@ -10,7 +10,8 @@ namespace FtxApi
     public class FtxWebSocketApi
     {
         protected string _url;
-        protected Action<FtxTicker> _handler;
+        protected Action<FtxTicker> _tickerHandler;
+        protected Action<FtxOrderEvt> _orderHandler;
 
         protected WebSocket _webSocketClient;
 
@@ -21,9 +22,11 @@ namespace FtxApi
             _url = url;
         }
 
-        public async Task Connect(Action<FtxTicker> handler = null)
+        public async Task Connect(Action<FtxTicker> tickerHandler = null,
+            Action<FtxOrderEvt> orderHandler = null)
         {
-            _handler = handler;
+            _tickerHandler = tickerHandler;
+            _orderHandler = orderHandler;
             _webSocketClient = await CreateWebSocket(_url);
             OnWebSocketConnect?.Invoke();
         }
@@ -85,9 +88,17 @@ namespace FtxApi
         protected void WebsocketOnMessageReceive(object o, MessageReceivedEventArgs msg)
         {
             var evt = JsonConvert.DeserializeObject<dynamic>(msg.Message);
-            string chn = evt.channel.ToString();
-            string type = evt.type.ToString();
-            if (type == "update" && chn == "trades" && evt.data != null)
+            string chn = evt.channel?.ToString() ?? "";
+            string type = evt.type?.ToString() ?? "";
+
+            if (type == "pong")
+            {
+                if (_tickerHandler != null)
+                {
+                    _tickerHandler(null);
+                }
+            }
+            else if (type == "update" && chn == "trades" && evt.data != null)
             {
                 var data = evt.data.Last;
 
@@ -95,13 +106,21 @@ namespace FtxApi
                 ticker.Instrument = evt.market;
                 ticker.LastPrice = data.price;
                 ticker.Time = data.time;
-                if (_handler != null)
+                if (_tickerHandler != null)
                 {
-                    _handler(ticker);
+                    _tickerHandler(ticker);
                 }
                 else
                 {
                     Console.WriteLine($"[ticker] {ticker.Instrument} {ticker.LastPrice} {ticker.Time}");
+                }
+            }
+            else if (type == "update" && chn == "orders" && evt.data != null)
+            {
+                if (_orderHandler != null)
+                {
+                    var evt2 = JsonConvert.DeserializeObject<FtxOrderPkg>(msg.Message);
+                    _orderHandler(evt2.data);
                 }
             }
         }

@@ -14,6 +14,26 @@ namespace FtxApi
         public DateTime Time;
         public decimal LastPrice;
     }
+
+    public class FtxOrderPkg
+    {
+        public string channel;
+        public string type;
+        public FtxOrderEvt data;
+    }
+    public class FtxOrderEvt
+    {
+        public long id;
+        public string market;
+        public string type;
+        public string side;
+        public decimal size;
+        public decimal? price;
+        public string status;
+        public decimal filledSize;
+        public decimal remainingSize;
+        public decimal? avgFillPrice;
+    }
     #endregion
 
     #region Result
