@@ -270,6 +270,7 @@ namespace FtxApi
                 $"\"type\": \"{orderType.ToString()}\"," +
                 $"\"size\": {amount}," +
                 $"\"ioc\": {ioc.ToString().ToLower()}," +
+                $"\"postOnly\": false," +
                 $"\"reduceOnly\": {reduceOnly.ToString().ToLower()}}}";
 
             var sign = GenerateSignature(HttpMethod.Post, "/api/orders", body);

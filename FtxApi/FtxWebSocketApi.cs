@@ -12,6 +12,7 @@ namespace FtxApi
         protected string _url;
         protected Action<FtxTicker> _tickerHandler;
         protected Action<FtxOrderEvt> _orderHandler;
+        protected Action<string> _defaultHandler;
 
         protected WebSocket _webSocketClient;
 
@@ -23,10 +24,12 @@ namespace FtxApi
         }
 
         public async Task Connect(Action<FtxTicker> tickerHandler = null,
-            Action<FtxOrderEvt> orderHandler = null)
+            Action<FtxOrderEvt> orderHandler = null,
+            Action<string> defaultHandler = null)
         {
             _tickerHandler = tickerHandler;
             _orderHandler = orderHandler;
+            _defaultHandler = defaultHandler;
             _webSocketClient = await CreateWebSocket(_url);
             OnWebSocketConnect?.Invoke();
         }
@@ -46,18 +49,29 @@ namespace FtxApi
             return webSocket;
         }
 
+        int _retries = 0;
         protected async Task OpenConnection(WebSocket webSocket)
         {
             webSocket.Open();
 
+            _retries = 0;
             while (webSocket.State != WebSocketState.Open)
             {
-                await Task.Delay(25);
+                await Task.Delay(100);
+                _retries += 1;
+                if (_retries >100)  // 10 seconds timeout
+                {
+                    throw new Exception("OpenConnection timeout and failed");
+                }
             }
         }
 
         public async Task Stop()
         {
+            _tickerHandler = null;
+            _orderHandler = null;
+            _defaultHandler = null;
+
             _webSocketClient.Opened -= WebsocketOnOpen;
             _webSocketClient.Error -= WebSocketOnError;
             _webSocketClient.Closed -= WebsocketOnClosed;
@@ -122,6 +136,10 @@ namespace FtxApi
                     var evt2 = JsonConvert.DeserializeObject<FtxOrderPkg>(msg.Message);
                     _orderHandler(evt2.data);
                 }
+            }
+            else if (_defaultHandler != null)
+            {
+                _defaultHandler(msg.Message);
             }
         }
 
